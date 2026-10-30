@@ -1,0 +1,937 @@
+Data base Mangementsystem ppl
+project name : Redline Blood Bank
+its store data in my sql and also store in firebase console i have mention all the screenshort 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Redline — Blood Bank Register</title>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://blood-x-bank-default-rtdb.firebaseio.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23A31621'/%3E%3C/svg%3E">
+<style>
+:root{
+  --ink:#1B1B1E; --paper:#FAF7F2; --line:#DDD6C9;
+  --red:#A31621; --red-dim:#7d1119; --teal:#2E5266; --rose:#F2DEDB;
+  --good:#3F7D58; --warn:#C97B2E; --muted:#7A756B;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --ink:#EDEAE3; --paper:#17181A; --line:#33322D; --rose:#3A2320; --muted:#9A968C;
+}}
+:root[data-theme="dark"]{
+  --ink:#EDEAE3; --paper:#17181A; --line:#33322D; --rose:#3A2320; --muted:#9A968C;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Iowan Old Style','Georgia',serif;
+  min-height:100%; }
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+.wrap{display:flex;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:5;display:flex;justify-content:flex-end;align-items:center;gap:10px;
+  padding:8px 20px;border-bottom:1px solid var(--line);background:var(--paper);font-family:system-ui,sans-serif;font-size:12px;color:var(--muted)}
+.topbar b{color:var(--ink)}
+.authwrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.authcard{width:100%;max-width:380px;border:1px solid var(--line);padding:30px 28px}
+.authcard h1{font-size:22px;margin:0 0 2px}
+.authcard .sub{margin-bottom:20px}
+.authcard .field{margin-bottom:12px}
+.authtabs{display:flex;gap:4px;margin-bottom:18px;font-family:system-ui,sans-serif}
+.authtabs button{flex:1;padding:8px;border:1px solid var(--line);background:none;color:var(--ink);cursor:pointer;font-size:13px}
+.authtabs button.active{background:var(--red);border-color:var(--red);color:#fff}
+.oauth{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.oauthbtn{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;border-radius:6px;padding:0 12px;height:40px;font-size:14px;font-weight:500;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .15s,box-shadow .15s}
+.oauthbtn svg{flex:0 0 auto}
+.oauthbtn.google{background:#fff;color:#1f1f1f;border:1px solid #747775}
+.oauthbtn.google:hover{background:#f7f8f8;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+:root:not([data-theme="light"]) .oauthbtn.google, :root[data-theme="dark"] .oauthbtn.google{background:#131314;color:#e3e3e3;border-color:#8e918f}
+:root:not([data-theme="light"]) .oauthbtn.google:hover, :root[data-theme="dark"] .oauthbtn.google:hover{background:#1e1f20}
+.oauthbtn.apple{background:#000;color:#fff;border:1px solid #000}
+.oauthbtn.apple:hover{background:#1a1a1a}
+:root:not([data-theme="light"]) .oauthbtn.apple, :root[data-theme="dark"] .oauthbtn.apple{background:#fff;color:#000;border-color:#fff}
+:root:not([data-theme="light"]) .oauthbtn.apple:hover, :root[data-theme="dark"] .oauthbtn.apple:hover{background:#f0f0f0}
+.divider{display:flex;align-items:center;gap:10px;margin:16px 0;font-family:system-ui,sans-serif;font-size:11px;color:var(--muted)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--line)}
+.authnote{font-family:system-ui,sans-serif;font-size:11px;color:var(--muted);margin-top:14px;line-height:1.5}
+.err{font-family:system-ui,sans-serif;color:var(--red);font-size:12px;margin-bottom:10px}
+nav.side{width:210px;flex:0 0 210px;border-right:1px solid var(--line);padding:20px 0;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{font-family:'Georgia',serif;font-weight:700;font-size:19px;padding:0 20px 4px;letter-spacing:.2px}
+.brand small{display:block;font-family:system-ui,sans-serif;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px}
+.navitem{display:block;width:100%;text-align:left;background:none;border:none;font-family:system-ui,sans-serif;
+  font-size:14px;color:var(--ink);padding:9px 20px;cursor:pointer;border-left:3px solid transparent}
+.navitem:hover{background:var(--rose)}
+.navitem.active{border-left-color:var(--red);color:var(--red);font-weight:600;background:var(--rose)}
+.navcount{float:right;color:var(--muted);font-size:12px}
+main{flex:1;padding:28px 34px;max-width:1000px;overflow-x:auto}
+h1{font-size:24px;margin:0 0 4px}
+.sub{font-family:system-ui,sans-serif;color:var(--muted);font-size:13px;margin-bottom:22px}
+.stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px}
+.stat{border:1px solid var(--line);padding:12px 16px;min-width:100px}
+.stat b{display:block;font-size:22px}
+.stat span{font-family:system-ui,sans-serif;font-size:11px;color:var(--muted)}
+.bg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:24px}
+.bg-cell{border:1px solid var(--line);padding:10px 12px;text-align:center}
+.bg-cell b{font-size:20px;color:var(--red)}
+.bg-cell.low b{color:var(--warn)}
+.bg-cell.zero b{color:var(--red-dim)}
+.bg-cell span{display:block;font-family:system-ui,sans-serif;font-size:11px;color:var(--muted);margin-top:2px}
+table{width:100%;border-collapse:collapse;font-family:system-ui,sans-serif;font-size:13px;margin-bottom:18px}
+th,td{border-bottom:1px solid var(--line);text-align:left;padding:8px 10px;white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+tr:hover td{background:var(--rose)}
+.tag{padding:2px 8px;border-radius:2px;font-size:11px;font-family:system-ui,sans-serif}
+.tag.ok{background:var(--good);color:#fff}
+.tag.warn{background:var(--warn);color:#fff}
+.tag.bad{background:var(--red-dim);color:#fff}
+.tag.pending{background:var(--teal);color:#fff}
+form.panel{border:1px solid var(--line);padding:16px;margin-bottom:22px;font-family:system-ui,sans-serif}
+form.panel h3{margin:0 0 12px;font-family:Georgia,serif;font-size:15px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:130px}
+.field label{font-size:11px;color:var(--muted)}
+input,select{font-family:system-ui,sans-serif;padding:7px 8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:13px}
+button.btn{font-family:system-ui,sans-serif;background:var(--red);color:#fff;border:none;padding:8px 16px;font-size:13px;cursor:pointer}
+button.btn:hover{background:var(--red-dim)}
+button.btn.ghost{background:none;border:1px solid var(--line);color:var(--ink)}
+button.small{font-family:system-ui,sans-serif;background:none;border:1px solid var(--line);padding:3px 8px;font-size:11px;cursor:pointer;color:var(--ink)}
+button.small:hover,a.small:hover{border-color:var(--red);color:var(--red)}
+a.small{font-family:system-ui,sans-serif;border:1px solid var(--line);padding:3px 8px;font-size:11px;color:var(--ink);text-decoration:none;display:inline-block}
+.empty{font-family:system-ui,sans-serif;color:var(--muted);font-size:13px;padding:20px 0}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sectionhead h2{font-size:17px;margin:0}
+.note{font-family:system-ui,sans-serif;font-size:12px;color:var(--muted);margin:-8px 0 16px}
+@media(max-width:700px){.wrap{flex-direction:column}nav.side{width:100%;height:auto;position:static;display:flex;overflow-x:auto;padding:10px}
+  .navitem{white-space:nowrap;border-left:none;border-bottom:3px solid transparent}.navitem.active{border-left:none;border-bottom-color:var(--red)}
+  .brand{padding:0 12px 0 4px;flex:0 0 auto;display:flex;align-items:center}main{padding:20px 16px}}
+</style>
+</head>
+<body>
+<div id="root"><div style="font:15px system-ui,sans-serif;color:#7A756B;padding:48px;text-align:center">Loading Redline…</div></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const GOOGLE_ICON=`<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2045c0-.6381-.0573-1.2518-.1636-1.8409H9v3.4814h4.8436c-.2086 1.125-.8427 2.0782-1.7959 2.7164v2.2581h2.9087c1.7018-1.5668 2.6836-3.874 2.6836-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.4673-.806 5.9564-2.1805l-2.9087-2.2581c-.8059.5399-1.8368.8591-3.0477.8591-2.3436 0-4.3282-1.5831-5.0364-3.7104H.9573v2.3318C2.4382 15.9832 5.4818 18 9 18z"/><path fill="#FBBC05" d="M3.9636 10.71c-.18-.5399-.2827-1.1168-.2827-1.71s.1027-1.1701.2827-1.71V4.9582H.9573C.3477 6.1732 0 7.5477 0 9s.3477 2.8268.9573 4.0418L3.9636 10.71z"/><path fill="#EA4335" d="M9 3.5795c1.3214 0 2.5077.4541 3.4405 1.346l2.5814-2.5814C13.4632.8918 11.4259 0 9 0 5.4818 0 2.4382 2.0168.9573 4.9582L3.9636 7.29C4.6718 5.1627 6.6564 3.5795 9 3.5795z"/></svg>`;
+const APPLE_ICON=`<svg width="16" height="18" viewBox="0 0 170 170" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.197-2.12-9.973-3.17-14.34-3.17-4.58 0-9.492 1.05-14.746 3.17-5.262 2.13-9.501 3.24-12.742 3.35-4.929.21-9.842-1.96-14.746-6.52-3.13-2.73-7.045-7.41-11.735-14.04-5.032-7.08-9.169-15.29-12.41-24.65-3.471-10.11-5.211-19.9-5.211-29.378 0-10.857 2.346-20.221 7.045-28.068 3.693-6.303 8.606-11.275 14.755-14.925s12.793-5.51 19.948-5.629c3.915 0 9.049 1.211 15.429 3.591 6.362 2.388 10.447 3.599 12.238 3.599 1.339 0 5.877-1.416 13.57-4.239 7.275-2.618 13.415-3.702 18.437-3.275 13.63 1.1 23.87 6.473 30.68 16.153-12.19 7.386-18.22 17.731-18.1 31.002.11 10.337 3.86 18.939 11.23 25.769 3.34 3.17 7.07 5.62 11.22 7.36-.9 2.61-1.85 5.11-2.86 7.51zM119.11 7.24c0 8.102-2.96 15.667-8.86 22.669-7.12 8.324-15.732 13.134-25.071 12.375a25.222 25.222 0 01-.188-3.07c0-7.778 3.386-16.102 9.399-22.908 3.002-3.446 6.82-6.311 11.45-8.597 4.62-2.253 8.99-3.499 13.1-3.71.12 1.083.17 2.166.17 3.24z"/></svg>`;
+const KEY='redline-bb-data-v1';
+const BLOOD_GROUPS=['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+const LOW_THRESHOLD=5;
+const TABLES=['donors','donations','tests','units','hospitals','requests','issues','doctors'];
+const emptyDb=()=>Object.fromEntries(TABLES.map(t=>[t,[]]));
+let db=emptyDb(), snap={};
+function takeSnap(){ TABLES.forEach(t=>snap[t]=new Map(db[t].map(r=>[r.id,JSON.stringify(r)]))); }
+// ====== FIREBASE CONFIG: paste your Firebase project values here ======
+const firebaseConfig={
+  apiKey:"AIzaSyCkf1JBWEZlAHQh8B-hK4uZou6wWCfSw3I",
+  authDomain:"blood-x-bank.firebaseapp.com",
+  databaseURL:"https://blood-x-bank-default-rtdb.firebaseio.com",
+  projectId:"blood-x-bank",
+  storageBucket:"blood-x-bank.firebasestorage.app",
+  messagingSenderId:"1075892853511",
+  appId:"1:1075892853511:web:be541687d70bcdc07dc3a2"
+};
+const FB_READY=!firebaseConfig.apiKey.startsWith('PASTE');
+let fbAuth=null, rtdb=null;
+if(FB_READY){ firebase.initializeApp(firebaseConfig); fbAuth=firebase.auth(); rtdb=firebase.database(); }
+async function fetchAll(){ // fetch all data in a single request (Realtime Database: /data/<table>/<id>)
+  const out=emptyDb();
+  const v=(await rtdb.ref('data').get()).val()||{};
+  TABLES.forEach(t=>{
+    out[t]=Object.values(v[t]||{}).map(x=>typeof x==='string'?JSON.parse(x):x).sort((a,b)=>a.id-b.id);
+  });
+  return out;
+}
+async function loadData(){ db=await fetchAll(); takeSnap(); }
+// ====== SQL (MySQL) mirror: every Firebase save is also sent to the Node server ======
+const SQL_API=(location.protocol==='file:'||location.hostname.endsWith('web.app')||location.hostname.endsWith('firebaseapp.com'))
+  ? 'http://localhost:3000' : '';   // when served by server.js, same origin. Change to your deployed server URL if hosted.
+function sqlSync(changes){
+  fetch(SQL_API+'/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(changes)})
+    .then(r=>r.json()).then(j=>{ if(!j.ok) console.warn('SQL sync failed:',j.error); })
+    .catch(e=>console.warn('SQL server not reachable:',e.message));
+}
+// One-time: copy everything already in Firebase into MySQL. Run  syncAllToSql()  in the browser console.
+window.syncAllToSql=async function(){
+  const r=await fetch(SQL_API+'/api/sync-all',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(db)});
+  console.log('Full sync to SQL:',await r.json());
+};
+// ---- Local cache: the app opens instantly, fresh data arrives in the background ----
+const CACHE_KEY='redline-cache-v2';
+function readCache(){ try{ return JSON.parse(localStorage.getItem(CACHE_KEY)||'null'); }catch(e){ return null; } }
+function clearCache(){ try{ localStorage.removeItem(CACHE_KEY); }catch(e){} }
+let cacheTimer=null;
+function writeCache(){
+  clearTimeout(cacheTimer);
+  cacheTimer=setTimeout(()=>{ try{ if(session&&session.uid) localStorage.setItem(CACHE_KEY,JSON.stringify({user:session,db})); }catch(e){} },400);
+}
+const stable=o=>JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.keys(v).sort().reduce((a,x)=>(a[x]=v[x],a),{}):v);
+let saveCount=0;
+async function refreshData(){
+  const before=saveCount;
+  try{
+    const fresh=await fetchAll();
+    if(saveCount!==before) return; // the user edited in the meantime, don't overwrite
+    if(stable(fresh)!==stable(db)){ db=fresh; takeSnap(); render(); }
+    writeCache();
+  }catch(e){ console.warn('Refresh failed',e); }
+}
+let saving=Promise.resolve();
+function save(){
+  const ch={};
+  TABLES.forEach(t=>{
+    const up=db[t].filter(r=>snap[t].get(r.id)!==JSON.stringify(r));
+    const ids=new Set(db[t].map(r=>r.id));
+    const del=[...snap[t].keys()].filter(i=>!ids.has(i));
+    if(up.length||del.length) ch[t]={upserts:up,deletes:del};
+  });
+  if(!Object.keys(ch).length) return;
+  saveCount++;
+  sqlSync(ch);
+  takeSnap(); writeCache();
+  saving=saving.then(async()=>{
+    const up={};
+    Object.entries(ch).forEach(([t,c])=>{
+      c.upserts.forEach(r=>{ up['data/'+t+'/'+r.id]=JSON.stringify(r); });
+      c.deletes.forEach(i=>{ up['data/'+t+'/'+i]=null; });
+    });
+    await rtdb.ref().update(up); // sab changes ek saath (atomic)
+  }).catch(e=>alert('Firebase save failed: '+e.message));
+}
+let session=null; // {name,email,provider}
+let geo=null, geoWatch=null, askedLoc=false; // geo={lat,lng,acc}
+function hash(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return String(h); }
+let _c=0; function nid(){ return Date.now()*1000+(_c++%1000); }
+function fmtDate(d){ return d; }
+function addDays(dateStr,n){ const d=new Date(dateStr); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function findDonor(id){ return db.donors.find(x=>x.id===id); }
+function findDonation(id){ return db.donations.find(x=>x.id===id); }
+function findHospital(id){ return db.hospitals.find(x=>x.id===id); }
+
+const TABS=[
+ {id:'dashboard',label:'Dashboard'},
+ {id:'donors',label:'Donors'},
+ {id:'donations',label:'Donations'},
+ {id:'testing',label:'Blood Testing'},
+ {id:'inventory',label:'Units & Inventory'},
+ {id:'hospitals',label:'Hospitals'},
+ {id:'doctors',label:'Nearby Doctors'},
+ {id:'requests',label:'Blood Requests'},
+ {id:'issues',label:'Blood Issues'},
+];
+let active='dashboard';
+
+function renderNav(){
+  const el=document.getElementById('navitems');
+  if(!el) return;
+  el.innerHTML='';
+  TABS.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='navitem'+(t.id===active?' active':'');
+    b.textContent=t.label;
+    b.onclick=()=>{active=t.id; render();};
+    el.appendChild(b);
+  });
+}
+
+function haversine(lat1,lon1,lat2,lon2){
+  const R=6371, toRad=x=>x*Math.PI/180;
+  const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
+  const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $id=id=>document.getElementById(id);
+
+// ---------- Maps: Leaflet + OpenStreetMap (works without any API key) ----------
+let docMap=null, pickMode=null, nearby=[], nbBusy=false, leafletP=null;
+let gm={layer:null,route:null,byKey:{}};
+function mapMsg(html){ const el=$id('docMap'); if(el) el.innerHTML=`<div class="empty" style="padding:20px;line-height:1.6">${html}</div>`; }
+function loadLeaflet(){
+  if(window.L&&L.map) return Promise.resolve();
+  if(leafletP) return leafletP;
+  leafletP=new Promise((res,rej)=>{
+    const css=document.createElement('link'); css.rel='stylesheet';
+    css.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css'; document.head.appendChild(css);
+    const sc=document.createElement('script'); sc.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js';
+    sc.onload=()=>res(); sc.onerror=()=>{ leafletP=null; rej(new Error('LOAD')); }; document.head.appendChild(sc);
+  });
+  return leafletP;
+}
+function teardownMap(){
+  try{ if(docMap) docMap.remove(); }catch(e){}
+  docMap=null; gm={layer:null,route:null,byKey:{}}; pickMode=null;
+}
+
+// Google Maps / Apple Maps deep links (no API key needed)
+const gLink=(lat,lng)=>`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`+(geo?`&origin=${geo.lat},${geo.lng}`:'');
+const aLink=(lat,lng)=>`https://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`+(geo?`&saddr=${geo.lat},${geo.lng}`:'');
+function mapLinks(lat,lng,popup){
+  const st=popup?'style="color:#1B1B1E;border:1px solid #999;padding:3px 8px;font-size:11px;text-decoration:none;display:inline-block;margin:2px 4px 0 0"':'class="small"';
+  return `<a ${st} href="${gLink(lat,lng)}" target="_blank" rel="noopener">Google Maps</a> <a ${st} href="${aLink(lat,lng)}" target="_blank" rel="noopener">Apple Maps</a>`;
+}
+function openSearch(which){
+  if(!geo){ alert('Turn on your location first, or set it on the map.'); return; }
+  const t=$id('nbType').value, q=t==='hospital'?'hospitals':t==='dentist'?'dentists':'doctors';
+  const url=which==='google'
+    ? `https://www.google.com/maps/search/${q}/@${geo.lat},${geo.lng},14z`
+    : `https://maps.apple.com/?q=${q}&sll=${geo.lat},${geo.lng}&z=14`;
+  window.open(url,'_blank','noopener');
+}
+
+function geoLabel(){
+  if(!geo) return '';
+  if(geo.manual) return `📍 Location set on map: ${geo.lat.toFixed(5)}, ${geo.lng.toFixed(5)}`;
+  return `📍 ${geo.lat.toFixed(5)}, ${geo.lng.toFixed(5)} · accuracy ±${Math.round(geo.acc)} m${geo.acc>1000?' (approximate, IP based; a phone GPS will be more accurate)':''}`;
+}
+function setLocStatus(t){ const g=$id('geoInfo'); if(g) g.textContent=t; }
+function setNbStatus(t){ const e=$id('nbInfo'); if(e) e.textContent=t; }
+function setLocBtn(text,disabled){ const b=$id('locBtn'); if(b){ b.textContent=text; b.disabled=!!disabled; } }
+
+function requestLocation(){
+  if(!navigator.geolocation){ setLocStatus('This browser does not support location. Use "Set my location on map".'); return; }
+  if(!window.isSecureContext){ setLocStatus('Open this page over https:// or http://localhost to use your location.'); return; }
+  if(geoWatch!=null){ navigator.geolocation.clearWatch(geoWatch); geoWatch=null; }
+  setLocBtn('Locating…',true); setLocStatus('Please allow the location permission…');
+  let best=null, done=false, firstFix=true; const t0=Date.now();
+  const stop=()=>{
+    if(done) return; done=true;
+    if(geoWatch!=null){ navigator.geolocation.clearWatch(geoWatch); geoWatch=null; }
+    setLocBtn('Refresh my location',false);
+    if(best){ paintMap(true); fetchNearby(); }
+    else setLocStatus('Could not get your location. Use "Set my location on map" and click on the map.');
+  };
+  geoWatch=navigator.geolocation.watchPosition(pos=>{
+    const c=pos.coords;
+    if(!best||c.accuracy<best.acc){
+      best={lat:c.latitude,lng:c.longitude,acc:c.accuracy}; geo=best; setLocStatus(geoLabel());
+      paintMap(firstFix); paintSaved(); firstFix=false;
+    }
+    if(c.accuracy<=40||Date.now()-t0>15000) stop();
+  }, err=>{
+    if(done) return; done=true;
+    if(geoWatch!=null){ navigator.geolocation.clearWatch(geoWatch); geoWatch=null; }
+    setLocBtn(geo?'Refresh my location':'Enable my location',false);
+    setLocStatus(err.code===1
+      ? 'Location permission denied. Click the 🔒 icon in the address bar → Location → Allow, or use "Set my location on map".'
+      : 'Location error: '+err.message+' — you can use "Set my location on map" instead.');
+  }, {enableHighAccuracy:true,maximumAge:0,timeout:20000});
+  setTimeout(stop,16000);
+}
+// pickMode: null | 'me' (set my location on the map) | 'doc' (pin a doctor's place on the map)
+function setPick(mode){
+  pickMode=(mode&&pickMode!==mode)?mode:null;
+  const a=$id('pickBtn'), b=$id('pinBtn');
+  if(a) a.textContent=pickMode==='me'?'Click on the map…':'Set my location on map';
+  if(b) b.textContent=pickMode==='doc'?'Click on the map…':'📍 Pin on map';
+  if(docMap) docMap.getContainer().style.cursor=pickMode?'crosshair':'';
+  if(pickMode&&$id('docMap')) $id('docMap').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function setManualLocation(lat,lng){
+  if(geoWatch!=null){ navigator.geolocation.clearWatch(geoWatch); geoWatch=null; }
+  geo={lat,lng,acc:0,manual:true}; setLocStatus(geoLabel()); setLocBtn('Use my GPS',false);
+  setPick(null); paintMap(true); paintSaved(); fetchNearby();
+}
+function setDocPin(lat,lng){
+  $id('docLat').value=lat.toFixed(6); $id('docLng').value=lng.toFixed(6);
+  const st=$id('mapsStatus'); if(st) st.textContent=`✓ Location picked from the map: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+  setPick(null); $id('fDoc').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// ---------- Nearby doctors (OpenStreetMap data via Overpass API, no key needed) ----------
+const OVERPASS=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];
+const NB_TYPES={all:'doctors?|clinic|hospital|dentist',clinic:'doctors?|clinic',hospital:'hospital',dentist:'dentist'};
+const KIND={doctors:'Doctor',doctor:'Doctor',clinic:'Clinic',hospital:'Hospital',dentist:'Dentist'};
+async function fetchNearby(){
+  if(!geo){ setNbStatus('Turn on your location, or tap "Set my location on map", to find doctors near you.'); return; }
+  if(nbBusy) return; nbBusy=true;
+  const km=+(($id('nbRadius')||{}).value||5), A=NB_TYPES[($id('nbType')||{}).value||'all'];
+  const btn=$id('nbBtn'); if(btn){ btn.disabled=true; btn.textContent='Searching…'; }
+  setNbStatus(`Searching within ${km} km…`);
+  const around=`(around:${km*1000},${geo.lat},${geo.lng})`;
+  const q=`[out:json][timeout:25];(nwr["amenity"~"^(${A})$"]${around};nwr["healthcare"~"^(${A})$"]${around};);out center tags 200;`;
+  let data=null;
+  for(const url of OVERPASS){
+    const ac=new AbortController(), t=setTimeout(()=>ac.abort(),22000);
+    try{
+      const r=await fetch(url,{method:'POST',body:new URLSearchParams({data:q}),signal:ac.signal});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      data=await r.json(); clearTimeout(t); break;
+    }catch(e){ clearTimeout(t); }
+  }
+  nbBusy=false; if(btn){ btn.disabled=false; btn.textContent='Search nearby'; }
+  if(!data){
+    nearby=[]; paintNearby(); paintMap();
+    setNbStatus('Could not load nearby places right now (the free map data service is busy). Tap "Search nearby" to retry, or use the Google Maps / Apple Maps buttons.');
+    return;
+  }
+  const seen=new Set(), out=[];
+  (data.elements||[]).forEach(e=>{
+    const t=e.tags||{}, lat=e.lat!=null?e.lat:(e.center&&e.center.lat), lng=e.lon!=null?e.lon:(e.center&&e.center.lon);
+    if(lat==null||lng==null||seen.has(e.type+e.id)) return; seen.add(e.type+e.id);
+    const k=KIND[t.amenity]||KIND[t.healthcare]||'Clinic';
+    const addr=[t['addr:housenumber'],t['addr:street'],t['addr:suburb']||t['addr:neighbourhood'],t['addr:city']].filter(Boolean).join(', ')||t['addr:full']||'';
+    out.push({name:t.name||t['name:en']||('Unnamed '+k.toLowerCase()),kind:k,
+      spec:(t['healthcare:speciality']||'').replace(/_/g,' ').replace(/;/g,', '),address:addr,
+      phone:t.phone||t['contact:phone']||'',lat,lng,dist:haversine(geo.lat,geo.lng,lat,lng)});
+  });
+  out.sort((a,b)=>a.dist-b.dist); nearby=out.slice(0,60);
+  setNbStatus(nearby.length
+    ? `Found ${out.length} place${out.length===1?'':'s'} within ${km} km — showing the nearest ${nearby.length}.`
+    : `No doctors, clinics or hospitals found within ${km} km in the map data. Try a larger radius, or use the Google Maps / Apple Maps buttons.`);
+  paintNearby(); paintMap(true);
+}
+function paintNearby(){
+  const el=$id('nearbyBox'); if(!el) return;
+  if(!nearby.length){ el.innerHTML=''; return; }
+  const saved=n=>db.doctors.some(d=>d.name===n.name&&Math.abs(d.lat-n.lat)<1e-5&&Math.abs(d.lng-n.lng)<1e-5);
+  el.innerHTML=`<h3 style="font-family:system-ui,sans-serif;font-size:14px;margin:16px 0 8px">Nearby doctors, clinics and hospitals</h3>
+  <div style="overflow-x:auto"><table><thead><tr><th>Name</th><th>Type</th><th>Address</th><th>Phone</th><th>Distance</th><th></th></tr></thead><tbody>${nearby.map((n,i)=>`<tr><td>${esc(n.name)}</td><td>${esc(n.kind)}${n.spec?'<br><small>'+esc(n.spec)+'</small>':''}</td><td>${esc(n.address||'—')}</td><td>${n.phone?`<a href="tel:${esc(n.phone)}">${esc(n.phone)}</a>`:'—'}</td><td>${n.dist.toFixed(1)} km</td>
+   <td style="white-space:nowrap"><button class="small" onclick="nbFocus(${i})">Show</button> <button class="small" onclick="routeNb(${i})">Route</button> ${mapLinks(n.lat,n.lng)} ${saved(n)?'<span class="note">Saved ✓</span>':`<button class="small" onclick="nbSave(${i})">Save</button>`}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function nbFocus(i){
+  const mk=gm.byKey['n'+i]; if(!mk||!docMap) return;
+  $id('docMap').scrollIntoView({behavior:'smooth',block:'center'});
+  docMap.setView(mk.getLatLng(),17); mk.openPopup();
+}
+function routeNb(i){ const n=nearby[i]; if(n) routeTo(n.lat,n.lng,n.name); }
+function nbSave(i){
+  const n=nearby[i]; if(!n) return;
+  db.doctors.push({id:nid(),name:n.name,specialty:n.spec||n.kind,hospital:'—',phone:n.phone||'—',address:n.address||'—',lat:n.lat,lng:n.lng});
+  save(); paintSaved(); paintNearby(); paintMap();
+}
+
+// ---------- Saved doctors ----------
+function paintSaved(){
+  const el=$id('savedBox'); if(!el) return;
+  if(!db.doctors.length){ el.innerHTML='<div class="empty">No doctors saved yet.</div>'; return; }
+  const w=db.doctors.map(d=>({...d,dist:geo&&d.lat?haversine(geo.lat,geo.lng,d.lat,d.lng):null}));
+  if(geo) w.sort((a,b)=>(a.dist==null)-(b.dist==null)||a.dist-b.dist);
+  el.innerHTML=`<h3 style="font-family:system-ui,sans-serif;font-size:14px;margin:16px 0 8px">Saved doctors</h3><div style="overflow-x:auto"><table><thead><tr><th>Doctor</th><th>Specialty</th><th>Hospital</th><th>Address</th><th>Phone</th><th>Distance</th><th></th></tr></thead><tbody>${w.map(d=>`<tr><td>${esc(d.name)}</td><td>${esc(d.specialty)}</td><td>${esc(d.hospital)}</td><td>${esc(d.address)}</td><td>${esc(d.phone)}</td><td>${d.dist!=null?d.dist.toFixed(1)+' km':'—'}</td>
+   <td style="white-space:nowrap">${d.lat?`<button class="small" onclick="docFocus(${d.id})">Show</button> <button class="small" onclick="docRoute(${d.id})">Route</button> ${mapLinks(d.lat,d.lng)} `:''}<button class="small" onclick="docDel(${d.id})">Remove</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function docDel(id){
+  if(!confirm('Remove this doctor from the register?')) return;
+  db.doctors=db.doctors.filter(x=>x.id!==id); save(); paintSaved(); paintNearby(); paintMap();
+}
+
+// ---------- Map ----------
+function initDocMap(){
+  const el=$id('docMap'); if(!el||!window.L) return;
+  teardownMap(); el.innerHTML='';
+  docMap=L.map(el,{center:geo?[geo.lat,geo.lng]:[20,0],zoom:geo?14:2});
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'}).addTo(docMap);
+  docMap.on('click',e=>{
+    if(pickMode==='me') setManualLocation(e.latlng.lat,e.latlng.lng); else if(pickMode==='doc') setDocPin(e.latlng.lat,e.latlng.lng);
+  });
+  paintMap(true);
+}
+function popupHtml(d,btns){
+  return `<div style="font-family:system-ui,sans-serif;font-size:12px;min-width:170px;color:#1B1B1E"><b>${esc(d.name)}</b><br>${esc(d.specialty||'')}<br>${esc(d.address||'')}<br>`
+   +(d.phone&&d.phone!=='—'?`<a href="tel:${esc(d.phone)}">${esc(d.phone)}</a><br>`:'')
+   +(d.dist!=null?`${d.dist.toFixed(1)} km away<br>`:'')+`<div style="margin-top:6px">${btns}</div></div>`;
+}
+function paintMap(fit){
+  if(!docMap||!window.L) return;
+  if(gm.layer) gm.layer.clearLayers(); else gm.layer=L.layerGroup().addTo(docMap);
+  gm.byKey={};
+  const savedPts=[];
+  nearby.forEach((n,i)=>{
+    const mk=L.circleMarker([n.lat,n.lng],{radius:7,color:'#fff',weight:2,fillColor:'#A31621',fillOpacity:1})
+      .bindPopup(popupHtml({...n,specialty:n.spec||n.kind},`<button onclick="routeNb(${i})">Route</button> `+mapLinks(n.lat,n.lng,true))).addTo(gm.layer);
+    gm.byKey['n'+i]=mk;
+  });
+  db.doctors.forEach(d=>{
+    if(!d.lat||!d.lng) return;
+    const dd={...d,dist:geo?haversine(geo.lat,geo.lng,d.lat,d.lng):null};
+    const mk=L.circleMarker([d.lat,d.lng],{radius:8,color:'#fff',weight:2,fillColor:'#3F7D58',fillOpacity:1})
+      .bindPopup(popupHtml(dd,`<button onclick="docRoute(${d.id})">Route</button> `+mapLinks(d.lat,d.lng,true))).addTo(gm.layer);
+    gm.byKey['d'+d.id]=mk; savedPts.push([d.lat,d.lng]);
+  });
+  if(geo){
+    const p=[geo.lat,geo.lng];
+    if(geo.acc>0) L.circle(p,{radius:geo.acc,color:'#2E7DD1',weight:1,fillOpacity:.1,interactive:false}).addTo(gm.layer);
+    L.circleMarker(p,{radius:9,color:'#fff',weight:3,fillColor:'#2E7DD1',fillOpacity:1}).bindTooltip(geo.manual?'Your chosen location':'You are here').addTo(gm.layer);
+  }
+  if(fit){
+    if(geo&&nearby.length) docMap.fitBounds(L.latLngBounds([[geo.lat,geo.lng]].concat(nearby.slice(0,15).map(n=>[n.lat,n.lng]))),{padding:[40,40],maxZoom:16});
+    else if(geo) docMap.setView([geo.lat,geo.lng],geo.acc>1000?13:15);
+    else if(savedPts.length) docMap.fitBounds(L.latLngBounds(savedPts),{padding:[40,40],maxZoom:16});
+  }
+}
+function docFocus(id){
+  const mk=gm.byKey['d'+id]; if(!mk||!docMap) return;
+  $id('docMap').scrollIntoView({behavior:'smooth',block:'center'});
+  docMap.setView(mk.getLatLng(),17); mk.openPopup();
+}
+function clearRoute(keepInfo){
+  if(gm.route&&docMap) docMap.removeLayer(gm.route);
+  gm.route=null;
+  if(keepInfo!==true){ const r=$id('routeInfo'); if(r) r.style.display='none'; }
+}
+function docRoute(id){ const d=db.doctors.find(x=>x.id===id); if(d) routeTo(d.lat,d.lng,d.name); }
+async function routeTo(lat,lng,name){
+  if(!docMap) return;
+  if(!geo){ alert('Turn on your location first, or set it with "Set my location on map".'); return; }
+  const info=$id('routeInfo'); info.style.display='block'; info.textContent='Finding the route…';
+  $id('docMap').scrollIntoView({behavior:'smooth',block:'center'});
+  docMap.closePopup(); clearRoute(true);
+  const fit=ll=>docMap.fitBounds(L.latLngBounds(ll),{padding:[40,40]});
+  try{
+    const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${geo.lng},${geo.lat};${lng},${lat}?overview=full&geometries=geojson`);
+    const j=await r.json(); if(j.code!=='Ok'||!j.routes.length) throw new Error('no route');
+    const rt=j.routes[0], path=rt.geometry.coordinates.map(c=>[c[1],c[0]]);
+    gm.route=L.polyline(path,{color:'#A31621',weight:5,opacity:.85}).addTo(docMap); fit(path);
+    info.innerHTML=`🚗 <b>${esc(name)}</b> — ${(rt.distance/1000).toFixed(1)} km by road · about ${Math.max(1,Math.round(rt.duration/60))} min ${mapLinks(lat,lng)} <button class="small" onclick="clearRoute()">Clear route</button>`;
+  }catch(e){
+    const path=[[geo.lat,geo.lng],[lat,lng]];
+    gm.route=L.polyline(path,{color:'#A31621',weight:3,opacity:.8,dashArray:'6 6'}).addTo(docMap); fit(path);
+    info.innerHTML=`Road route not available. Straight-line distance: ${haversine(geo.lat,geo.lng,lat,lng).toFixed(1)} km ${mapLinks(lat,lng)} <button class="small" onclick="clearRoute()">Clear</button>`;
+  }
+}
+
+function availableUnits(bg){
+  return db.units.filter(u=>u.bloodGroup===bg && u.status==='Available');
+}
+function inventoryCounts(){
+  const m={}; BLOOD_GROUPS.forEach(g=>m[g]=0);
+  db.units.forEach(u=>{ if(u.status==='Available') m[u.bloodGroup]=(m[u.bloodGroup]||0)+1; });
+  return m;
+}
+
+function render(){
+  if(docMap) teardownMap();
+  const root=document.getElementById('root');
+  if(!session){ renderAuth(root); return; }
+  root.innerHTML=`
+   <div class="topbar">Signed in as <b>${session.name}</b> (${session.email})
+     <button class="small" id="signOutBtn">Sign out</button>
+   </div>
+   <div class="wrap">
+    <nav class="side"><div class="brand">Redline<small>Blood Bank Register</small></div><div id="navitems"></div></nav>
+    <main id="main"></main>
+   </div>`;
+  document.getElementById('signOutBtn').onclick=()=>{ if(fbAuth) fbAuth.signOut(); session=null; clearCache(); db=emptyDb(); takeSnap(); active='dashboard'; render(); };
+  renderNav();
+  const m=document.getElementById('main');
+  if(active==='dashboard') return renderDashboard(m);
+  if(active==='donors') return renderDonors(m);
+  if(active==='donations') return renderDonations(m);
+  if(active==='testing') return renderTesting(m);
+  if(active==='inventory') return renderInventory(m);
+  if(active==='hospitals') return renderHospitals(m);
+  if(active==='doctors') return renderDoctors(m);
+  if(active==='requests') return renderRequests(m);
+  if(active==='issues') return renderIssues(m);
+}
+
+let authMode='login';
+function renderAuth(root){
+  root.innerHTML=`<div class="authwrap"><div class="authcard">
+   <h1>Redline</h1><div class="sub" style="font-family:system-ui,sans-serif;color:var(--muted);font-size:13px;margin-bottom:0">Sign in to the blood bank register</div>
+   <div class="authtabs" style="margin-top:18px">
+     <button id="tabLogin" class="${authMode==='login'?'active':''}">Sign in</button>
+     <button id="tabSignup" class="${authMode==='signup'?'active':''}">Create account</button>
+   </div>
+   <div id="authErr" class="err"></div>
+   <form id="fAuth">
+     ${authMode==='signup'?'<div class="field"><input required name="name" placeholder="Full name"></div>':''}
+     <div class="field"><input required type="email" name="email" placeholder="Email address"></div>
+     <div class="field"><input required type="password" name="password" placeholder="Password" minlength="4"></div>
+     <button class="btn" style="width:100%" type="submit">${authMode==='login'?'Sign in':'Create account'}</button>
+   </form>
+   <div class="divider">OR CONTINUE WITH</div>
+   <div class="oauth">
+     <button class="oauthbtn google" id="googleBtn">${GOOGLE_ICON} Continue with Google</button>
+   </div>
+   <div class="authnote">Every person who opens this register signs in first, so activity stays attributed to a real account. Accounts are handled by Firebase Authentication and all data is stored in Firebase Realtime Database.</div>
+  </div></div>`;
+  document.getElementById('tabLogin').onclick=()=>{authMode='login';render();};
+  document.getElementById('tabSignup').onclick=()=>{authMode='signup';render();};
+  document.getElementById('googleBtn').onclick=()=>quickOauth('Google');
+  document.getElementById('fAuth').onsubmit=async e=>{
+    e.preventDefault(); const fd=new FormData(e.target); const errEl=document.getElementById('authErr');
+    if(!FB_READY){ errEl.textContent='Paste your firebaseConfig first (at the top of the script)'; return; }
+    authBusy=true;
+    try{
+      let u;
+      if(authMode==='signup'){
+        const c=await fbAuth.createUserWithEmailAndPassword(fd.get('email'),fd.get('password'));
+        await c.user.updateProfile({displayName:fd.get('name').trim()});
+        u={uid:c.user.uid,name:fd.get('name').trim(),email:c.user.email,provider:'email'};
+      } else {
+        const c=await fbAuth.signInWithEmailAndPassword(fd.get('email'),fd.get('password'));
+        u=toUser(c.user,'email');
+      }
+      authBusy=false; await startSession(u);
+    }catch(err){ authBusy=false; errEl.textContent=fbMsg(err); }
+  };
+}
+let authBusy=false;
+function fbMsg(e){
+  const m={'auth/email-already-in-use':'Email already registered','auth/invalid-credential':'Wrong email or password',
+    'auth/wrong-password':'Wrong email or password','auth/user-not-found':'No account with this email',
+    'auth/weak-password':'Password must be at least 6 characters','auth/invalid-email':'Invalid email',
+    'auth/popup-closed-by-user':'The Google window was closed','auth/operation-not-supported-in-this-environment':'Open the page from http://localhost (Firebase login does not work from file://)',
+    'auth/operation-not-allowed':'Enable this provider (Email/Password or Google) in Firebase Console > Authentication > Sign-in method','auth/configuration-not-found':'Click "Get started" in Firebase Console > Authentication','auth/popup-blocked':'The browser blocked the popup, please allow popups','auth/network-request-failed':'Network problem, please try again','auth/too-many-requests':'Too many attempts, please try again later','auth/unauthorized-domain':'Add this domain in Firebase Console > Authentication > Settings > Authorized domains'};
+  return (m[e.code]||e.message)+(e.code?' ['+e.code+']':'');
+}
+const toUser=(u,provider)=>({uid:u.uid,name:u.displayName||(u.email||'User').split('@')[0],email:u.email,provider:provider||(u.providerData[0]&&u.providerData[0].providerId==='google.com'?'Google':'email')});
+async function startSession(u){
+  session={uid:u.uid,name:u.name,email:u.email,provider:u.provider};
+  document.getElementById('root').innerHTML='<div style="font:15px system-ui,sans-serif;color:#7A756B;padding:48px;text-align:center">Loading your data…</div>';
+  try{ await loadData(); }catch(e){ alert('Data load failed: '+e.message); }
+  render(); writeCache();
+}
+async function quickOauth(provider){
+  if(!FB_READY){ alert('Paste your firebaseConfig first'); return; }
+  authBusy=true;
+  try{ const c=await fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); authBusy=false; await startSession(toUser(c.user,'Google')); }
+  catch(e){ authBusy=false; const el=document.getElementById('authErr'); if(el) el.textContent=fbMsg(e); }
+}
+function parseMapsLink(u){
+  if(!u) return null;
+  u=String(u).trim();
+  if(/^(https?:\/\/)?(maps\.app\.goo\.gl|goo\.gl\/maps|g\.co\/kgs)/i.test(u)) return {short:true};
+  try{ u=decodeURIComponent(u); }catch(e){}
+  const n='(-?\\d{1,3}(?:\\.\\d+)?)';
+  const pats=[
+    new RegExp('!3d'+n+'!4d'+n),                                   // exact pin (place links)
+    new RegExp('[?&](?:q|ll|query|destination|daddr|center|sll)='+n+'[,+ ]\\s*'+n), // ?q=lat,lng
+    new RegExp('/place/'+n+',\\s*'+n),                              // /place/lat,lng
+    new RegExp('@'+n+','+n),                                        // map centre
+    new RegExp('^\\s*'+n+'\\s*[,; ]\\s*'+n+'\\s*$')                // plain "lat, lng"
+  ];
+  for(const p of pats){
+    const m=u.match(p); if(!m) continue;
+    const lat=parseFloat(m[1]), lng=parseFloat(m[2]);
+    if(Math.abs(lat)<=90&&Math.abs(lng)<=180) return {lat,lng};
+  }
+  return null;
+}
+function renderDoctors(m){
+  m.innerHTML=`<h1>Nearby Doctors</h1><div class="sub">Find doctors, clinics and hospitals around your live location, see them on the map, and open directions in Google Maps or Apple Maps</div>
+  <div class="row" style="font-family:system-ui,sans-serif;align-items:center;margin-bottom:10px;gap:10px">
+    <button class="btn" id="locBtn">${geo&&!geo.manual?'Refresh my location':'Enable my location'}</button>
+    <button class="btn" id="pickBtn" style="background:var(--teal)">Set my location on map</button>
+    <span id="geoInfo" style="font-size:12px;color:var(--muted)">${esc(geoLabel())}</span>
+  </div>
+  <div class="row" style="font-family:system-ui,sans-serif;align-items:center;margin-bottom:10px;gap:10px">
+    <select id="nbRadius" style="padding:8px"><option value="2">Within 2 km</option><option value="5" selected>Within 5 km</option><option value="10">Within 10 km</option><option value="25">Within 25 km</option></select>
+    <select id="nbType" style="padding:8px"><option value="all">All (doctors, clinics, hospitals, dentists)</option><option value="clinic">Doctors &amp; clinics</option><option value="hospital">Hospitals</option><option value="dentist">Dentists</option></select>
+    <button class="btn" id="nbBtn">Search nearby</button>
+    <button class="btn" id="gsBtn" style="background:var(--teal)">Search in Google Maps</button>
+    <button class="btn" id="asBtn" style="background:var(--teal)">Search in Apple Maps</button>
+  </div>
+  <div id="nbInfo" class="note" style="margin:0 0 8px;color:var(--ink)">${geo?'':'Allow location access to see doctors near you.'}</div>
+  <div id="docMap" style="height:440px;border:1px solid var(--line);margin-bottom:8px;background:#e8e4da"><div class="empty" style="padding:20px">Loading map…</div></div>
+  <div id="routeInfo" class="note" style="display:none;margin:0 0 8px;color:var(--ink)"></div>
+  <div class="note" style="margin:0 0 18px">🔵 You &nbsp; 🔴 Nearby doctors &nbsp; 🟢 Saved doctors</div>
+  <div id="nearbyBox"></div>
+  <form class="panel" id="fDoc" style="margin-top:18px"><h3>Save a doctor to this register</h3>
+   <div class="row">
+    <div class="field"><label>Name</label><input required name="name" placeholder="Dr. …"></div>
+    <div class="field"><label>Specialty</label><input required name="specialty"></div>
+    <div class="field"><label>Hospital / clinic</label><input required name="hospital"></div>
+    <div class="field"><label>Phone</label><input required name="phone"></div>
+   </div>
+   <div class="row">
+    <div class="field" style="flex:2"><label>Address</label><input required name="address"></div>
+   </div>
+   <div class="row" style="align-items:flex-end">
+    <div class="field" style="flex:3"><label>Google Maps or Apple Maps link (optional) — paste it and the latitude/longitude will fill in automatically</label><input name="mapsurl" id="mapsUrl" placeholder="https://www.google.com/maps/place/…"></div>
+    <div class="field"><label>Latitude</label><input type="number" step="any" name="lat" id="docLat" placeholder="auto"></div>
+    <div class="field"><label>Longitude</label><input type="number" step="any" name="lng" id="docLng" placeholder="auto"></div>
+    <div class="field" style="flex:0 0 auto"><button class="btn" type="button" id="pinBtn" style="background:var(--teal)">📍 Pin on map</button></div>
+   </div>
+   <div id="mapsStatus" class="note" style="margin:0 0 12px"></div>
+   <button class="btn" type="submit">Save doctor</button>
+  </form>
+  <div id="savedBox"></div>`;
+  $id('locBtn').onclick=requestLocation;
+  $id('pickBtn').onclick=()=>setPick('me');
+  $id('pinBtn').onclick=()=>setPick('doc');
+  $id('nbBtn').onclick=fetchNearby;
+  $id('nbRadius').onchange=()=>{ if(geo) fetchNearby(); };
+  $id('nbType').onchange=()=>{ if(geo) fetchNearby(); };
+  $id('gsBtn').onclick=()=>openSearch('google');
+  $id('asBtn').onclick=()=>openSearch('apple');
+  pickMode=null;
+  paintSaved(); paintNearby();
+  loadLeaflet().then(()=>{
+    if(active!=='doctors'||!$id('docMap')) return;
+    initDocMap();
+    if(geo){ setLocStatus(geoLabel()); fetchNearby(); }
+    else if(!askedLoc){ askedLoc=true; requestLocation(); }
+  }).catch(()=>mapMsg('The map could not be loaded. Check your internet connection and refresh the page.'));
+  const fillFromLink=()=>{
+    const st=$id('mapsStatus'), v=$id('mapsUrl').value;
+    if(!v.trim()){ st.textContent=''; return true; }
+    const r=parseMapsLink(v);
+    if(r&&r.short){ st.textContent='⚠ This is a short link (maps.app.goo.gl). Open it in your browser, copy the full link from the address bar and paste it here.'; return false; }
+    if(!r){ st.textContent='⚠ No location found in this link. Open the place in Google Maps or Apple Maps and paste the full link from the address bar.'; return false; }
+    $id('docLat').value=r.lat; $id('docLng').value=r.lng;
+    st.textContent=`✓ Location found: ${r.lat}, ${r.lng}`; return true;
+  };
+  $id('mapsUrl').oninput=fillFromLink;
+  $id('fDoc').onsubmit=e=>{
+    e.preventDefault();
+    if(!fillFromLink()) return; // a link was given but could not be parsed
+    const f=new FormData(e.target);
+    const lat=parseFloat(f.get('lat')), lng=parseFloat(f.get('lng'));
+    db.doctors.push({id:nid(),name:f.get('name'),specialty:f.get('specialty'),hospital:f.get('hospital'),
+      phone:f.get('phone'),address:f.get('address'),lat:isNaN(lat)?0:lat,lng:isNaN(lng)?0:lng});
+    save(); e.target.reset(); $id('mapsStatus').textContent=''; paintSaved(); paintNearby(); paintMap(true);
+  };
+}
+
+function renderDashboard(m){
+  const counts=inventoryCounts();
+  const totalUnits=db.units.filter(u=>u.status==='Available').length;
+  const pendingReq=db.requests.filter(r=>r.status==='Pending'||r.status==='Approved').length;
+  m.innerHTML=`<h1>Dashboard</h1><div class="sub">Live overview of the blood bank register</div>
+  <div class="stats">
+   <div class="stat"><b>${db.donors.length}</b><span>REGISTERED DONORS</span></div>
+   <div class="stat"><b>${db.donations.length}</b><span>TOTAL DONATIONS</span></div>
+   <div class="stat"><b>${totalUnits}</b><span>UNITS AVAILABLE</span></div>
+   <div class="stat"><b>${db.hospitals.length}</b><span>PARTNER HOSPITALS</span></div>
+   <div class="stat"><b>${pendingReq}</b><span>OPEN REQUESTS</span></div>
+  </div>
+  <div class="sectionhead"><h2>Inventory by blood group</h2></div>
+  <div class="bg-grid">${BLOOD_GROUPS.map(g=>{
+    const c=counts[g]||0; const cls=c===0?'zero':(c<LOW_THRESHOLD?'low':'');
+    return `<div class="bg-cell ${cls}"><b>${g}</b><span>${c} unit${c===1?'':'s'}</span></div>`;
+  }).join('')}</div>
+  <div class="sectionhead"><h2>Recent activity</h2></div>
+  ${recentActivityTable()}`;
+}
+function recentActivityTable(){
+  const events=[];
+  db.donations.forEach(d=>events.push({date:d.date,text:`Donation #${d.id} collected (${d.bloodGroup})`}));
+  db.tests.forEach(t=>events.push({date:t.date,text:`Testing on donation #${t.donationId} — ${t.result}`}));
+  db.issues.forEach(i=>events.push({date:i.issueDate,text:`Issued ${i.unitIds.length} unit(s) for request #${i.requestId}`}));
+  events.sort((a,b)=> b.date.localeCompare(a.date));
+  if(!events.length) return '<div class="empty">No activity yet. Start by registering a donor.</div>';
+  return `<table><thead><tr><th>Date</th><th>Event</th></tr></thead><tbody>
+   ${events.slice(0,10).map(e=>`<tr><td>${e.date}</td><td>${e.text}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderDonors(m){
+  m.innerHTML=`<h1>Donors</h1><div class="sub">Everyone registered to give blood</div>
+  <form class="panel" id="fDonor"><h3>Register donor</h3>
+   <div class="row">
+    <div class="field"><label>Full name</label><input required name="name"></div>
+    <div class="field"><label>Age</label><input required type="number" min="18" max="65" name="age"></div>
+    <div class="field"><label>Gender</label><select name="gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+    <div class="field"><label>Blood group</label><select name="bloodGroup">${BLOOD_GROUPS.map(g=>`<option>${g}</option>`).join('')}</select></div>
+   </div>
+   <div class="row">
+    <div class="field"><label>Phone</label><input required name="phone"></div>
+    <div class="field" style="flex:2"><label>Address</label><input name="address"></div>
+   </div>
+   <button class="btn" type="submit">Add donor</button>
+  </form>
+  ${db.donors.length? donorTable() : '<div class="empty">No donors yet — register one above.</div>'}`;
+  document.getElementById('fDonor').onsubmit=e=>{
+    e.preventDefault(); const f=new FormData(e.target);
+    db.donors.push({id:nid(),name:f.get('name'),age:+f.get('age'),gender:f.get('gender'),
+      bloodGroup:f.get('bloodGroup'),phone:f.get('phone'),address:f.get('address')||'—',lastDonation:null});
+    save(); render();
+  };
+}
+function donorTable(){
+  return `<table><thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Gender</th><th>Group</th><th>Phone</th><th>Last donation</th><th></th></tr></thead>
+  <tbody>${db.donors.map(d=>`<tr><td>#${d.id}</td><td>${d.name}</td><td>${d.age}</td><td>${d.gender}</td><td>${d.bloodGroup}</td><td>${d.phone}</td><td>${d.lastDonation||'—'}</td>
+  <td><button class="small" onclick="delDonor(${d.id})">Remove</button></td></tr>`).join('')}</tbody></table>`;
+}
+function delDonor(id){
+  if(db.donations.some(d=>d.donorId===id)){ alert('This donor has donation records and cannot be removed.'); return; }
+  db.donors=db.donors.filter(d=>d.id!==id); save(); render();
+}
+
+function renderDonations(m){
+  const opts=db.donors.map(d=>`<option value="${d.id}">#${d.id} ${d.name} (${d.bloodGroup})</option>`).join('');
+  m.innerHTML=`<h1>Donations</h1><div class="sub">Blood collected from donors, pending laboratory testing</div>
+  ${db.donors.length? `<form class="panel" id="fDon"><h3>Record a donation</h3>
+   <div class="row">
+    <div class="field"><label>Donor</label><select name="donorId">${opts}</select></div>
+    <div class="field"><label>Date</label><input required type="date" name="date" value="${today()}"></div>
+    <div class="field"><label>Volume (ml)</label><input required type="number" name="volume" value="450" min="200" max="500"></div>
+   </div>
+   <button class="btn" type="submit">Log donation</button>
+  </form>` : '<div class="empty">Register a donor first before logging a donation.</div>'}
+  ${db.donations.length? donationTable() : ''}`;
+  const f=document.getElementById('fDon');
+  if(f) f.onsubmit=e=>{
+    e.preventDefault(); const fd=new FormData(e.target); const donor=findDonor(+fd.get('donorId'));
+    db.donations.push({id:nid(),donorId:donor.id,date:fd.get('date'),volumeMl:+fd.get('volume'),bloodGroup:donor.bloodGroup,tested:false});
+    donor.lastDonation=fd.get('date');
+    save(); render();
+  };
+}
+function donationTable(){
+  return `<table><thead><tr><th>ID</th><th>Donor</th><th>Group</th><th>Date</th><th>Volume</th><th>Status</th></tr></thead>
+  <tbody>${db.donations.map(d=>{
+    const donor=findDonor(d.donorId);
+    const test=db.tests.find(t=>t.donationId===d.id);
+    const status=test? `<span class="tag ${test.result==='Pass'?'ok':'bad'}">${test.result==='Pass'?'Tested — passed':'Tested — discarded'}</span>` : `<span class="tag pending">Awaiting testing</span>`;
+    return `<tr><td>#${d.id}</td><td>${donor?donor.name:'—'}</td><td>${d.bloodGroup}</td><td>${d.date}</td><td>${d.volumeMl} ml</td><td>${status}</td></tr>`;
+  }).join('')}</tbody></table>`;
+}
+
+function renderTesting(m){
+  const untested=db.donations.filter(d=>!db.tests.some(t=>t.donationId===d.id));
+  const opts=untested.map(d=>`<option value="${d.id}">#${d.id} — ${findDonor(d.donorId)?.name} (${d.bloodGroup}), ${d.date}</option>`).join('');
+  m.innerHTML=`<h1>Blood Testing</h1><div class="sub">Screen each donation before it becomes a usable unit</div>
+  ${untested.length? `<form class="panel" id="fTest"><h3>Record test result</h3>
+   <div class="row"><div class="field" style="flex:2"><label>Donation</label><select name="donationId">${opts}</select></div>
+   <div class="field"><label>Date</label><input required type="date" name="date" value="${today()}"></div></div>
+   <div class="row">
+    ${['HIV','Hepatitis B','Hepatitis C','Syphilis','Malaria'].map(k=>`<div class="field"><label>${k}</label><select name="${k}"><option>Negative</option><option>Positive</option></select></div>`).join('')}
+   </div>
+   <button class="btn" type="submit">Submit result</button>
+  </form>` : '<div class="empty">No donations awaiting testing.</div>'}
+  ${db.tests.length? testTable() : ''}`;
+  const f=document.getElementById('fTest');
+  if(f) f.onsubmit=e=>{
+    e.preventDefault(); const fd=new FormData(e.target);
+    const donationId=+fd.get('donationId'); const donation=findDonation(donationId);
+    const screens=['HIV','Hepatitis B','Hepatitis C','Syphilis','Malaria'].map(k=>fd.get(k));
+    const result=screens.some(v=>v==='Positive') ? 'Fail' : 'Pass';
+    db.tests.push({id:nid(),donationId,date:fd.get('date'),screens,result});
+    if(result==='Pass'){
+      db.units.push({id:nid(),donationId,bloodGroup:donation.bloodGroup,collectionDate:donation.date,
+        expiryDate:addDays(donation.date,42),status:'Available'});
+    } else {
+      db.units.push({id:nid(),donationId,bloodGroup:donation.bloodGroup,collectionDate:donation.date,
+        expiryDate:addDays(donation.date,42),status:'Discarded'});
+    }
+    save(); render();
+  };
+}
+function testTable(){
+  return `<table><thead><tr><th>ID</th><th>Donation</th><th>Date</th><th>Result</th></tr></thead>
+  <tbody>${db.tests.slice().reverse().map(t=>`<tr><td>#${t.id}</td><td>#${t.donationId}</td><td>${t.date}</td>
+  <td><span class="tag ${t.result==='Pass'?'ok':'bad'}">${t.result==='Pass'?'Passed — safe for use':'Failed — discarded'}</span></td></tr>`).join('')}</tbody></table>`;
+}
+
+function renderInventory(m){
+  const counts=inventoryCounts();
+  const expiringSoon=db.units.filter(u=>u.status==='Available' && (new Date(u.expiryDate)-new Date(today()))/86400000<=7);
+  m.innerHTML=`<h1>Units &amp; Inventory</h1><div class="sub">Every collected unit and current stock by blood group</div>
+  <div class="bg-grid">${BLOOD_GROUPS.map(g=>{
+    const c=counts[g]||0; const cls=c===0?'zero':(c<LOW_THRESHOLD?'low':'');
+    return `<div class="bg-cell ${cls}"><b>${g}</b><span>${c} unit${c===1?'':'s'}</span></div>`;
+  }).join('')}</div>
+  ${expiringSoon.length?`<div class="note">⚠ ${expiringSoon.length} unit(s) expiring within 7 days.</div>`:''}
+  ${db.units.length? unitTable() : '<div class="empty">No units yet — units are created automatically once a donation passes testing.</div>'}`;
+}
+function unitTable(){
+  return `<table><thead><tr><th>Unit</th><th>Group</th><th>Collected</th><th>Expiry</th><th>Status</th></tr></thead>
+  <tbody>${db.units.slice().reverse().map(u=>{
+    const cls=u.status==='Available'?'ok':(u.status==='Issued'?'pending':(u.status==='Reserved'?'warn':'bad'));
+    return `<tr><td>#${u.id}</td><td>${u.bloodGroup}</td><td>${u.collectionDate}</td><td>${u.expiryDate}</td><td><span class="tag ${cls}">${u.status}</span></td></tr>`;
+  }).join('')}</tbody></table>`;
+}
+
+function renderHospitals(m){
+  m.innerHTML=`<h1>Hospitals</h1><div class="sub">Registered facilities that can request blood</div>
+  <form class="panel" id="fHosp"><h3>Register hospital</h3>
+   <div class="row">
+    <div class="field" style="flex:2"><label>Hospital name</label><input required name="name"></div>
+    <div class="field"><label>Contact person</label><input required name="contact"></div>
+    <div class="field"><label>Phone</label><input required name="phone"></div>
+   </div>
+   <div class="row"><div class="field" style="flex:3"><label>Address</label><input name="address"></div></div>
+   <button class="btn" type="submit">Add hospital</button>
+  </form>
+  ${db.hospitals.length? hospTable() : '<div class="empty">No hospitals registered yet.</div>'}`;
+  document.getElementById('fHosp').onsubmit=e=>{
+    e.preventDefault(); const f=new FormData(e.target);
+    db.hospitals.push({id:nid(),name:f.get('name'),contact:f.get('contact'),phone:f.get('phone'),address:f.get('address')||'—'});
+    save(); render();
+  };
+}
+function hospTable(){
+  return `<table><thead><tr><th>ID</th><th>Name</th><th>Contact</th><th>Phone</th><th>Address</th></tr></thead>
+  <tbody>${db.hospitals.map(h=>`<tr><td>#${h.id}</td><td>${h.name}</td><td>${h.contact}</td><td>${h.phone}</td><td>${h.address}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function renderRequests(m){
+  const opts=db.hospitals.map(h=>`<option value="${h.id}">#${h.id} ${h.name}</option>`).join('');
+  m.innerHTML=`<h1>Blood Requests</h1><div class="sub">Requests raised by hospitals for blood units</div>
+  ${db.hospitals.length? `<form class="panel" id="fReq"><h3>New request</h3>
+   <div class="row">
+    <div class="field" style="flex:2"><label>Hospital</label><select name="hospitalId">${opts}</select></div>
+    <div class="field"><label>Blood group</label><select name="bloodGroup">${BLOOD_GROUPS.map(g=>`<option>${g}</option>`).join('')}</select></div>
+    <div class="field"><label>Units needed</label><input required type="number" min="1" name="units" value="1"></div>
+    <div class="field"><label>Urgency</label><select name="urgency"><option>Routine</option><option>Urgent</option><option>Emergency</option></select></div>
+   </div>
+   <button class="btn" type="submit">Submit request</button>
+  </form>` : '<div class="empty">Register a hospital first before raising a request.</div>'}
+  ${db.requests.length? reqTable() : ''}`;
+  const f=document.getElementById('fReq');
+  if(f) f.onsubmit=e=>{
+    e.preventDefault(); const fd=new FormData(e.target);
+    db.requests.push({id:nid(),hospitalId:+fd.get('hospitalId'),bloodGroup:fd.get('bloodGroup'),
+      units:+fd.get('units'),urgency:fd.get('urgency'),date:today(),status:'Pending'});
+    save(); render();
+  };
+}
+function reqTable(){
+  return `<table><thead><tr><th>ID</th><th>Hospital</th><th>Group</th><th>Units</th><th>Urgency</th><th>Date</th><th>Status</th></tr></thead>
+  <tbody>${db.requests.slice().reverse().map(r=>{
+    const h=findHospital(r.hospitalId);
+    const cls=r.status==='Fulfilled'?'ok':(r.status==='Rejected'?'bad':'pending');
+    return `<tr><td>#${r.id}</td><td>${h?h.name:'—'}</td><td>${r.bloodGroup}</td><td>${r.units}</td><td>${r.urgency}</td><td>${r.date}</td><td><span class="tag ${cls}">${r.status}</span></td></tr>`;
+  }).join('')}</tbody></table>`;
+}
+
+function renderIssues(m){
+  const openReqs=db.requests.filter(r=>r.status==='Pending'||r.status==='Approved');
+  m.innerHTML=`<h1>Blood Issues</h1><div class="sub">Fulfil requests by issuing available units from inventory</div>
+  ${openReqs.length? `<table><thead><tr><th>Request</th><th>Hospital</th><th>Group</th><th>Needed</th><th>Available</th><th></th></tr></thead>
+  <tbody>${openReqs.map(r=>{
+    const h=findHospital(r.hospitalId); const avail=availableUnits(r.bloodGroup).length;
+    const enough=avail>=r.units;
+    return `<tr><td>#${r.id}</td><td>${h?h.name:'—'}</td><td>${r.bloodGroup}</td><td>${r.units}</td>
+    <td>${avail}${enough?'':' <span class="tag warn">short</span>'}</td>
+    <td><button class="small" ${enough?'':'disabled'} onclick="issueFor(${r.id})">Issue units</button></td></tr>`;
+  }).join('')}</tbody></table>` : '<div class="empty">No open requests to fulfil.</div>'}
+  ${db.issues.length? issueTable() : ''}`;
+}
+function issueFor(reqId){
+  const r=db.requests.find(x=>x.id===reqId); if(!r) return;
+  const avail=availableUnits(r.bloodGroup);
+  if(avail.length<r.units){ alert('Not enough stock to fulfil this request.'); return; }
+  const chosen=avail.slice(0,r.units);
+  chosen.forEach(u=>u.status='Issued');
+  db.issues.push({id:nid(),requestId:r.id,unitIds:chosen.map(u=>u.id),issueDate:today()});
+  r.status='Fulfilled';
+  save(); render();
+}
+function issueTable(){
+  return `<table><thead><tr><th>Issue</th><th>Request</th><th>Units issued</th><th>Date</th></tr></thead>
+  <tbody>${db.issues.slice().reverse().map(i=>`<tr><td>#${i.id}</td><td>#${i.requestId}</td><td>${i.unitIds.map(id=>'#'+id).join(', ')}</td><td>${i.issueDate}</td></tr>`).join('')}</tbody></table>`;
+}
+
+if(!FB_READY){ render(); }
+else {
+  const c=readCache();
+  if(c&&c.user&&c.user.uid&&c.db){ // cached session: UI turant dikhao
+    session=c.user; db=Object.assign(emptyDb(),c.db); takeSnap(); render();
+  }
+  fbAuth.onAuthStateChanged(u=>{
+    if(authBusy) return;
+    if(!u){ session=null; db=emptyDb(); takeSnap(); clearCache(); render(); return; }
+    if(session&&session.uid===u.uid){ refreshData(); return; } // shown from cache, refreshing in the background
+    session=null; db=emptyDb(); takeSnap();
+    startSession(toUser(u));
+  });
+}
+</script>
+</body>
+</html>
